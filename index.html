@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tensor Chips: An Interactive Primer</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121a33; --panel2:#172142; --ink:#eef4ff; --muted:#a9b7d6;
+      --accent:#70e1ff; --accent2:#a78bfa; --good:#67e8a5; --warn:#ffd166; --bad:#ff6b8a;
+      --line:rgba(255,255,255,.12); --shadow:0 20px 60px rgba(0,0,0,.35); --radius:22px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font:16px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:radial-gradient(circle at 20% 0%,#20315e 0,#0b1020 38%),linear-gradient(120deg,#0b1020,#121936);}
+    a{color:var(--accent)}
+    header{position:relative;overflow:hidden;padding:72px 24px 48px;border-bottom:1px solid var(--line)}
+    .wrap{max-width:1180px;margin:0 auto}.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:32px;align-items:center}
+    h1{font-size:clamp(42px,7vw,82px);line-height:.95;margin:0 0 18px;letter-spacing:-.06em}.subtitle{font-size:clamp(18px,2vw,23px);color:var(--muted);max-width:760px}.pill{display:inline-flex;gap:9px;align-items:center;border:1px solid var(--line);background:rgba(255,255,255,.06);border-radius:999px;padding:8px 12px;color:#dbeafe;margin-bottom:18px}.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}.btn{border:1px solid var(--line);background:linear-gradient(180deg,rgba(112,225,255,.18),rgba(167,139,250,.12));color:var(--ink);padding:12px 16px;border-radius:14px;text-decoration:none;cursor:pointer;font-weight:700}.btn.secondary{background:rgba(255,255,255,.06)}
+    .chip{aspect-ratio:1.1/1;background:linear-gradient(145deg,#263a73,#121a33);border:1px solid rgba(112,225,255,.25);border-radius:32px;box-shadow:var(--shadow);padding:28px;position:relative;overflow:hidden}.chip:before{content:"";position:absolute;inset:18px;border:2px solid rgba(112,225,255,.35);border-radius:22px}.grid{position:absolute;inset:52px;display:grid;grid-template-columns:repeat(8,1fr);gap:6px}.cell{border-radius:7px;background:rgba(112,225,255,.13);border:1px solid rgba(112,225,255,.18);animation:pulse 2.4s infinite ease-in-out}.cell:nth-child(3n){animation-delay:.3s;background:rgba(167,139,250,.18)}.cell:nth-child(5n){animation-delay:.7s;background:rgba(103,232,165,.16)}@keyframes pulse{50%{filter:brightness(1.9);transform:scale(.96)}}.pins{position:absolute;inset:auto 18px 10px;display:grid;grid-template-columns:repeat(16,1fr);gap:5px}.pin{height:10px;background:#50608c;border-radius:99px}.chiplabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:900;font-size:34px;letter-spacing:-.04em;text-shadow:0 3px 18px #000;color:#fff;z-index:2}
+    nav{position:sticky;top:0;z-index:10;background:rgba(11,16,32,.78);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}nav .wrap{display:flex;gap:8px;overflow:auto;padding:10px 24px}nav a{white-space:nowrap;color:var(--muted);text-decoration:none;border:1px solid transparent;padding:8px 11px;border-radius:999px}nav a:hover{border-color:var(--line);color:var(--ink);background:rgba(255,255,255,.05)}
+    section{padding:52px 24px;border-bottom:1px solid var(--line)}h2{font-size:clamp(30px,4vw,48px);line-height:1;margin:0 0 18px;letter-spacing:-.04em}h3{margin:0 0 10px;font-size:22px}.lead{color:var(--muted);font-size:19px;max-width:870px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}.card{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.18)}.card strong{color:#fff}.muted{color:var(--muted)}.tag{display:inline-block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#08111f;background:var(--accent);border-radius:999px;padding:4px 8px;font-weight:900}.tag.purple{background:var(--accent2);color:white}.tag.green{background:var(--good);color:#06140d}.tag.yellow{background:var(--warn);color:#211600}
+    .lab{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}.matrix{display:grid;grid-template-columns:repeat(3,52px);gap:8px;align-items:center}.mcell{width:52px;height:52px;border-radius:12px;background:#0e1530;border:1px solid var(--line);color:var(--ink);font-size:20px;text-align:center}.mathrow{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.op{font-size:34px;color:var(--accent);font-weight:900}.result{font-size:20px;font-weight:800}.slider{width:100%}.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{background:#0e1530;border:1px solid var(--line);padding:14px;border-radius:16px}.stat b{display:block;font-size:25px;color:var(--accent)}
+    .bars{display:grid;gap:12px;margin-top:16px}.bar{display:grid;grid-template-columns:120px 1fr 80px;gap:10px;align-items:center}.track{height:18px;background:#0e1530;border-radius:999px;overflow:hidden;border:1px solid var(--line)}.fill{height:100%;width:20%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;transition:width .35s ease}.quiz{display:grid;gap:14px}.choice{display:block;width:100%;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);border-radius:14px;padding:13px;cursor:pointer}.choice.correct{border-color:var(--good);background:rgba(103,232,165,.13)}.choice.wrong{border-color:var(--bad);background:rgba(255,107,138,.12)}.timeline{display:grid;gap:14px}.event{display:grid;grid-template-columns:110px 1fr;gap:16px}.year{color:var(--accent);font-weight:900}.foot{color:var(--muted);font-size:14px}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0e1530;border:1px solid var(--line);border-radius:8px;padding:2px 6px}.notice{border-left:4px solid var(--warn);background:rgba(255,209,102,.09);padding:14px 16px;border-radius:14px}.mini{font-size:14px}.hidden{display:none}
+    @media(max-width:850px){.hero,.lab{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.statgrid{grid-template-columns:repeat(2,1fr)}.bar{grid-template-columns:90px 1fr 60px}.event{grid-template-columns:1fr}.chip{max-width:520px;margin:auto}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap hero">
+      <div>
+        <div class="pill">🧠 Interactive hardware explainer</div>
+        <h1>Tensor chips, without the incense.</h1>
+        <p class="subtitle">Tensor chips are processors built to do the math behind modern AI very fast: huge numbers of small multiply-and-add operations on arrays of numbers.</p>
+        <div class="cta"><a class="btn" href="#matrix">Try matrix math</a><a class="btn secondary" href="#sim">Run the workload simulator</a><a class="btn secondary" href="#quiz">Take the quiz</a></div>
+      </div>
+      <div class="chip" aria-label="Stylized tensor chip">
+        <div class="grid" id="chipGrid"></div><div class="chiplabel">TENSOR</div><div class="pins" id="pins"></div>
+      </div>
+    </div>
+  </header>
+  <nav><div class="wrap"><a href="#what">What</a><a href="#why">Why</a><a href="#matrix">Matrix lab</a><a href="#inside">Inside</a><a href="#sim">Simulator</a><a href="#types">Types</a><a href="#limits">Limits</a><a href="#quiz">Quiz</a></div></nav>
+
+  <section id="what"><div class="wrap">
+    <h2>What is a tensor chip?</h2>
+    <p class="lead">A tensor chip is a specialized processor for tensor operations. A <strong>tensor</strong> is just a structured block of numbers: a scalar is 0-D, a vector is 1-D, a matrix is 2-D, and images/audio/model weights become bigger tensors.</p>
+    <div class="cards">
+      <div class="card"><span class="tag">Core idea</span><h3>Lots of tiny math</h3><p>AI models mostly perform repeated <strong>multiply-accumulate</strong> work: <span class="kbd">a × b + c</span>, billions or trillions of times.</p></div>
+      <div class="card"><span class="tag purple">Specialization</span><h3>Less general, much faster</h3><p>A CPU can do nearly anything. A tensor chip does fewer things, but does the AI-shaped things brutally fast and energy-efficiently.</p></div>
+      <div class="card"><span class="tag green">Where used</span><h3>Training and inference</h3><p>They train large models in data centers and run models on phones, laptops, cars, cameras, and servers.</p></div>
+    </div>
+  </div></section>
+
+  <section id="why"><div class="wrap">
+    <h2>Why AI wants them</h2>
+    <p class="lead">Neural networks are basically enormous recipes of linear algebra plus non-linear steps. The expensive part is usually moving and multiplying numbers, not philosophizing about AGI on LinkedIn.</p>
+    <div class="cards">
+      <div class="card"><h3>Parallelism</h3><p>Instead of one arithmetic unit doing one operation, tensor chips use arrays of many units working at once.</p></div>
+      <div class="card"><h3>Lower precision</h3><p>AI often tolerates approximate numbers: FP16, BF16, INT8, FP8, sometimes lower. Smaller numbers mean faster math and less memory traffic.</p></div>
+      <div class="card"><h3>Data reuse</h3><p>Weights and activations are reused across many operations. Good tensor chips keep data close so they do not waste energy dragging it across the chip.</p></div>
+    </div>
+  </div></section>
+
+  <section id="matrix"><div class="wrap">
+    <h2>Matrix multiplication lab</h2>
+    <p class="lead">Most model layers boil down to multiplying matrices. Change the inputs and watch one output cell update.</p>
+    <div class="lab">
+      <div class="panel">
+        <h3>Compute one output cell</h3>
+        <div class="mathrow">
+          <div><p class="muted mini">Matrix A row</p><div class="matrix" id="matA"></div></div>
+          <div class="op">×</div>
+          <div><p class="muted mini">Matrix B column</p><div class="matrix" id="matB"></div></div>
+        </div>
+        <p class="result" id="matResult"></p>
+        <button class="btn secondary" id="randomize">Randomize</button>
+      </div>
+      <div class="panel">
+        <h3>What the chip does</h3>
+        <p>For each output cell, hardware performs dot products:</p>
+        <p class="kbd" id="formula"></p>
+        <p class="muted">A tensor accelerator repeats this pattern across many cells at once, using a grid of multiply-add units. Fancy name: often a <strong>systolic array</strong>.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="inside"><div class="wrap">
+    <h2>Inside a tensor chip</h2>
+    <div class="cards">
+      <div class="card"><span class="tag">Compute</span><h3>MAC arrays</h3><p>Thousands of multiply-accumulate units arranged to process matrix tiles in parallel.</p></div>
+      <div class="card"><span class="tag purple">Memory</span><h3>SRAM / cache</h3><p>Fast on-chip memory stores tiles of weights and activations. This matters because moving data often costs more energy than computing on it.</p></div>
+      <div class="card"><span class="tag green">Control</span><h3>Scheduler + compiler</h3><p>Software decides how to split model operations into chip-friendly chunks. Bad compilation can make expensive silicon look stupid.</p></div>
+      <div class="card"><span class="tag yellow">Interconnect</span><h3>Networking</h3><p>Large training jobs need many chips talking quickly. Bandwidth and latency become survival issues.</p></div>
+      <div class="card"><span class="tag">Precision</span><h3>FP/BF/INT formats</h3><p>Support for FP32, TF32, FP16, BF16, FP8, INT8, etc. Different chips optimize different formats.</p></div>
+      <div class="card"><span class="tag purple">I/O</span><h3>HBM / DRAM</h3><p>High-bandwidth memory feeds the compute units. If compute waits for memory, you bought a very expensive space heater.</p></div>
+    </div>
+  </div></section>
+
+  <section id="sim"><div class="wrap">
+    <h2>Workload simulator</h2>
+    <p class="lead">This is a toy model, not a benchmark. It shows the tradeoff: CPU flexibility, GPU throughput, tensor-chip specialization.</p>
+    <div class="lab">
+      <div class="panel">
+        <label>Matrix size: <b id="sizeLabel">1024</b> × <b id="sizeLabel2">1024</b></label>
+        <input class="slider" id="sizeSlider" type="range" min="128" max="4096" step="128" value="1024" />
+        <label>Precision</label>
+        <select id="precision" class="choice" style="margin-top:8px"><option value="1">FP32 / high precision</option><option value="2">FP16/BF16</option><option value="4">INT8 / quantized</option></select>
+        <label style="display:block;margin-top:12px"><input type="checkbox" id="memoryBound" /> Memory-bound workload</label>
+        <div class="statgrid" style="margin-top:16px">
+          <div class="stat"><b id="ops">2.1B</b><span class="muted">approx ops</span></div>
+          <div class="stat"><b id="winner">Tensor</b><span class="muted">likely winner</span></div>
+          <div class="stat"><b id="speedup">52×</b><span class="muted">vs CPU</span></div>
+          <div class="stat"><b id="note">Compute</b><span class="muted">bottleneck</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Relative time</h3>
+        <div class="bars">
+          <div class="bar"><span>CPU</span><div class="track"><div class="fill" id="cpuBar"></div></div><b id="cpuTime"></b></div>
+          <div class="bar"><span>GPU</span><div class="track"><div class="fill" id="gpuBar"></div></div><b id="gpuTime"></b></div>
+          <div class="bar"><span>Tensor chip</span><div class="track"><div class="fill" id="tensorBar"></div></div><b id="tensorTime"></b></div>
+        </div>
+        <p class="muted mini">Shorter bars are better. Assumes tensor chips win most when the workload is dense matrix math and the compiler can keep the array fed.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="types"><div class="wrap">
+    <h2>Names you’ll see</h2>
+    <div class="cards">
+      <div class="card"><h3>Google TPU</h3><p>Tensor Processing Unit. Designed around matrix/tensor operations for Google-scale AI workloads.</p></div>
+      <div class="card"><h3>NVIDIA Tensor Cores</h3><p>Special units inside NVIDIA GPUs that accelerate matrix math, especially mixed precision AI work.</p></div>
+      <div class="card"><h3>Apple Neural Engine</h3><p>On-device neural processor in Apple silicon for local inference: photos, speech, ML features, and increasingly generative tasks.</p></div>
+      <div class="card"><h3>NPUs</h3><p>Neural Processing Units in phones and PCs. Usually optimized for efficient inference, not giant model training.</p></div>
+      <div class="card"><h3>AI ASICs</h3><p>Custom application-specific chips from cloud vendors and startups. Great if the workload matches. Expensive paperweight otherwise.</p></div>
+      <div class="card"><h3>Edge accelerators</h3><p>Small low-power chips for cameras, sensors, robotics, and embedded devices.</p></div>
+    </div>
+  </div></section>
+
+  <section id="limits"><div class="wrap">
+    <h2>What they do not magically solve</h2>
+    <div class="notice"><strong>Important:</strong> Tensor chips accelerate math. They do not automatically make models smarter, safer, cheaper, or easier to deploy. Silicon is not a business model. Shocking, I know.</div>
+    <div class="cards">
+      <div class="card"><h3>Memory wall</h3><p>If model data cannot reach compute fast enough, performance collapses.</p></div>
+      <div class="card"><h3>Software stack</h3><p>Compilers, kernels, drivers, frameworks, and profiling tools determine whether the chip is useful.</p></div>
+      <div class="card"><h3>Model fit</h3><p>Sparse, branchy, weird workloads may not map well to dense tensor arrays.</p></div>
+    </div>
+  </div></section>
+
+  <section id="timeline"><div class="wrap">
+    <h2>Tiny timeline</h2>
+    <div class="timeline">
+      <div class="event"><div class="year">Pre-2010s</div><div>CPUs and GPUs dominate numerical computing. GPUs become useful for neural nets because they are massively parallel.</div></div>
+      <div class="event"><div class="year">2010s</div><div>Deep learning explodes. GPUs add more dedicated matrix hardware; Google introduces TPUs for internal and cloud workloads.</div></div>
+      <div class="event"><div class="year">2020s</div><div>AI accelerators become central infrastructure. Phones and laptops add NPUs; data centers scale GPU/TPU clusters with high-bandwidth memory and networking.</div></div>
+    </div>
+  </div></section>
+
+  <section id="quiz"><div class="wrap">
+    <h2>Check your understanding</h2>
+    <div class="lab">
+      <div class="panel quiz" id="quizBox"></div>
+      <div class="panel"><h3>Score</h3><p class="result" id="score">0 / 4</p><p class="muted">Click an answer. I will be mercifully less annoying than most learning apps.</p><button class="btn secondary" id="resetQuiz">Reset quiz</button></div>
+    </div>
+  </div></section>
+
+  <section><div class="wrap foot">
+    <p><strong>Bottom line:</strong> tensor chips are AI math engines. They are built to multiply and accumulate tensors quickly, with the right precision, memory layout, and parallelism. CPUs are generalists, GPUs are parallel beasts, tensor chips are specialized accelerators.</p>
+    <p>Self-contained artifact. No external scripts, trackers, frameworks, or other tiny crimes.</p>
+  </div></section>
+
+<script>
+  const grid=document.getElementById('chipGrid'); for(let i=0;i<64;i++){const d=document.createElement('div');d.className='cell';d.style.animationDelay=(Math.random()*1.8).toFixed(2)+'s';grid.appendChild(d)}
+  const pins=document.getElementById('pins'); for(let i=0;i<16;i++){const d=document.createElement('div');d.className='pin';pins.appendChild(d)}
+
+  const matA=document.getElementById('matA'), matB=document.getElementById('matB'); let A=[2,1,3], B=[4,0,5];
+  function drawMatrices(){ matA.innerHTML=''; matB.innerHTML=''; for(let i=0;i<9;i++){let input=document.createElement('input'); input.className='mcell'; input.type='number'; input.value=i<3?A[i]:''; input.disabled=i>=3; input.oninput=()=>{A[i]=Number(input.value||0);updateMath()}; matA.appendChild(input)} for(let i=0;i<9;i++){let input=document.createElement('input'); input.className='mcell'; input.type='number'; input.value=i%3===1?B[Math.floor(i/3)]:''; input.disabled=i%3!==1; input.oninput=()=>{B[Math.floor(i/3)]=Number(input.value||0);updateMath()}; matB.appendChild(input)} updateMath(); }
+  function updateMath(){ const terms=A.map((x,i)=>x*B[i]); const sum=terms.reduce((a,b)=>a+b,0); document.getElementById('formula').textContent=`(${A[0]}×${B[0]}) + (${A[1]}×${B[1]}) + (${A[2]}×${B[2]}) = ${sum}`; document.getElementById('matResult').textContent=`Output cell = ${terms.join(' + ')} = ${sum}`; }
+  document.getElementById('randomize').onclick=()=>{A=A.map(()=>Math.floor(Math.random()*7)-2);B=B.map(()=>Math.floor(Math.random()*7)-2);drawMatrices()}; drawMatrices();
+
+  const sizeSlider=document.getElementById('sizeSlider'), precision=document.getElementById('precision'), memoryBound=document.getElementById('memoryBound');
+  function fmt(n){ if(n>=1e12)return(n/1e12).toFixed(1)+'T'; if(n>=1e9)return(n/1e9).toFixed(1)+'B'; if(n>=1e6)return(n/1e6).toFixed(1)+'M'; return Math.round(n).toString(); }
+  function updateSim(){ const n=Number(sizeSlider.value), p=Number(precision.value), mem=memoryBound.checked; document.getElementById('sizeLabel').textContent=n; document.getElementById('sizeLabel2').textContent=n; const ops=2*n*n*n; document.getElementById('ops').textContent=fmt(ops); let cpu=ops/1e11, gpu=ops/(mem?6e12:2e13*p), tensor=ops/(mem?8e12:6e13*p); if(n<384){cpu*=.25;gpu*=1.8;tensor*=3.0} if(mem){gpu*=2.2;tensor*=2.8;document.getElementById('note').textContent='Memory'} else document.getElementById('note').textContent='Compute'; const max=Math.max(cpu,gpu,tensor); [['cpu',cpu],['gpu',gpu],['tensor',tensor]].forEach(([k,v])=>{document.getElementById(k+'Bar').style.width=Math.max(4,(v/max)*100)+'%';document.getElementById(k+'Time').textContent=v<.001?(v*1e6).toFixed(0)+'µs':v<1?(v*1000).toFixed(1)+'ms':v.toFixed(2)+'s'}); const best=Math.min(cpu,gpu,tensor); document.getElementById('winner').textContent=best===tensor?'Tensor':best===gpu?'GPU':'CPU'; document.getElementById('speedup').textContent=(cpu/best).toFixed(0)+'×'; }
+  [sizeSlider,precision,memoryBound].forEach(el=>el.addEventListener('input',updateSim)); updateSim();
+
+  const questions=[
+    {q:'What operation dominates many neural network layers?', a:'Matrix/tensor multiply-accumulate', c:['Recursive file deletion','Matrix/tensor multiply-accumulate','Sorting strings alphabetically']},
+    {q:'Why use FP16/BF16/INT8?', a:'Less data movement and faster math when accuracy allows it', c:['Because exact precision is illegal','Less data movement and faster math when accuracy allows it','To make CPUs obsolete in spreadsheets']},
+    {q:'What can bottleneck a tensor chip?', a:'Memory bandwidth and data movement', c:['Too much CSS','Memory bandwidth and data movement','The word tensor being overused']},
+    {q:'Which statement is true?', a:'Tensor chips are specialized accelerators, not universal magic', c:['Tensor chips are specialized accelerators, not universal magic','Tensor chips replace all software engineering','Bigger chip names guarantee better models']}
+  ];
+  const quizBox=document.getElementById('quizBox'); let answered={};
+  function renderQuiz(){quizBox.innerHTML=''; questions.forEach((qq,idx)=>{const div=document.createElement('div'); div.innerHTML=`<h3>${idx+1}. ${qq.q}</h3>`; qq.c.forEach(ch=>{const b=document.createElement('button'); b.className='choice'; b.textContent=ch; if(answered[idx]) b.disabled=true; if(answered[idx]===ch) b.classList.add(ch===qq.a?'correct':'wrong'); if(answered[idx]&&ch===qq.a) b.classList.add('correct'); b.onclick=()=>{answered[idx]=ch; renderQuiz();}; div.appendChild(b)}); quizBox.appendChild(div)}); const score=questions.filter((q,i)=>answered[i]===q.a).length; document.getElementById('score').textContent=`${score} / ${questions.length}`;}
+  document.getElementById('resetQuiz').onclick=()=>{answered={};renderQuiz()}; renderQuiz();
+</script>
+</body>
+</html>
